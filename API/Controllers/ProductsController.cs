@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Interfaces;
 
 namespace API.Controllers
 {
@@ -12,32 +13,36 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly StoreContext context;
+        private readonly IProductRepository repo;
 
-        public ProductsController(StoreContext context)
+        public ProductsController(IProductRepository repo)
         {
-            this.context = context;
+            this.repo = repo;
         }
 
         [HttpGet]
         public async Task<ActionResult<List<Product>>> GetProducts()
         {
-            var products = await  context.Products.ToListAsync();
+            var products = await repo.GetProductsAsync();
             return Ok(products);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            return await context.Products.FindAsync(id);
+            return await repo.GetProductByIdAsync(id);
         }
 
-        private void Insert3Rows()
+        [HttpGet("brands")]
+        public async Task<ActionResult<List<ProductBrand>>> GetProductBrands()
         {
-            context.Products.Add(new Product() { Id = 1, Name = "Product1" });
-            context.Products.Add(new Product() { Id = 2, Name = "Product2" });
-            context.Products.Add(new Product() { Id = 3, Name = "Product3" });
-            context.SaveChanges();
+            return Ok(await repo.GetProductBrandsAsync());
+        }
+
+        [HttpGet("types")]
+        public async Task<ActionResult<List<ProductType>>> GetProductTypes()
+        {
+            return Ok(await repo.GetProductTypesAsync());
         }
     }
 }
